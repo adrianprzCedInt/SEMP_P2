@@ -1,0 +1,55 @@
+# STM32CubeIDE - Archivos del workspace
+.metadata
+.settings/
+language.settings.xml
+
+# Archivos de compilación
+Debug/
+Release/
+Build/
+*.o
+*.d
+*.su
+*.elf
+*.bin
+*.hex
+*.map
+*.list
+*.lst
+
+# Archivos generados por STM32CubeMX
+*.ioc.bak
+MX_Device.h
+*.mxproject
+
+# Archivos temporales del IDE
+*.launch
+.DS_Store
+Thumbs.db
+
+# Archivos de usuario específicos
+*.orig
+*.log
+*.swp
+*~
+
+# Configuraciones locales de depuración
+*.cfg
+
+# Archivos específicos de Windows
+desktop.ini
+
+# Archivos específicos de Linux
+*~
+
+# Archivos específicos de macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Carpetas de dependencias (si usas librerías externas)
+Drivers/CMSIS/
+Drivers/STM32*_HAL_Driver/
+
+# Mantener solo los archivos de código de usuario
+# Si quieres trackear los drivers HAL/CMSIS generados, comenta las líneas de arriba
