@@ -32,6 +32,8 @@
 #include "fsm_system_led.h"
 #include "fsm_fetch_data.h"
 #include "stm32f411e_discovery_accelerometer.h"
+#include "stm32f411e_discovery_gyroscope.h"
+
 
 /* USER CODE END Includes */
 
@@ -104,6 +106,7 @@ int main(void)
 
 
 	BSP_ACCELERO_Init();
+	BSP_GYRO_Init();
 
   /* USER CODE END 1 */
 

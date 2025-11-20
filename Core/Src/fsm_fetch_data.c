@@ -61,7 +61,7 @@ static int check_off (fsm_t* this)	{
 	return !system_status;
 }
 
-int is_sample_time (fsm_t* this) {
+static int is_sample_time (fsm_t* this) {
 	uint32_t now = HAL_GetTick();
 	if ((now - last_time) >= SAMPLE_RATE_MS) {
 		last_time = now;
@@ -71,7 +71,7 @@ int is_sample_time (fsm_t* this) {
 	}
 }
 
-int has_enough_samples(fsm_t* this) {
+static int has_enough_samples(fsm_t* this) {
 	if (samples == NUM_SAMPLES) {
 		return 1;
 	} else {
@@ -117,8 +117,6 @@ static void leds_off(fsm_t* this) {
 	HAL_GPIO_WritePin(GPIOD, Orange_Led_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(GPIOD, Green_Led_Pin, GPIO_PIN_RESET);
 }
-
-
 
 
 fsm_trans_t fsm_data_fetch_tt[] = {

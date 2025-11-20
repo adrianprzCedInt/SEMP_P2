@@ -141,12 +141,12 @@ void StartDefaultTask(void *argument)
 	MX_USB_HOST_Init();
   /* USER CODE BEGIN StartDefaultTask */
 	fsm_t* f1 = fsm_system_led_new();
-	fsm_t* f2 = fsm_fetch_data_new();
+	//fsm_t* f2 = fsm_fetch_data_new();
   /* Infinite loop */
   for(;;)
   {
 	fsm_fire(f1);
-	fsm_fire(f2);
+	//fsm_fire(f2);
 	// Delay para que el planificador pueda entrar en juego,
 	// Delay <= 5 para que funcione correctamente el sistema
 	osDelay(5);
