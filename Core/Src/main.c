@@ -22,7 +22,6 @@
 #include "i2c.h"
 #include "i2s.h"
 #include "spi.h"
-#include "usb_host.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -203,7 +202,9 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+int __io_putchar(int ch){
+	return ITM_SendChar(ch);
+}
 /* USER CODE END 4 */
 
 /**

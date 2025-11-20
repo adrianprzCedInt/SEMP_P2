@@ -84,6 +84,7 @@ static void fetch_data(fsm_t* this) {
 	float32_t sqrt = pDataXYZ[0]*pDataXYZ[0] + pDataXYZ[1]*pDataXYZ[1] + pDataXYZ[2]*pDataXYZ[2];
 	if (arm_sqrt_f32(sqrt, &movimiento) == ARM_MATH_SUCCESS){
 		movimiento = movimiento - gravity;
+		printf("Hola");
 		printf("Magnetometer %d\r\n", (int)movimiento);
 	}
 	if (movimiento > TH_MAX){
