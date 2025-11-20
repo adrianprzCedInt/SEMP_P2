@@ -24,6 +24,7 @@
 #include "spi.h"
 #include "usb_host.h"
 #include "gpio.h"
+#include <stdio.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
