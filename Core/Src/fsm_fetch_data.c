@@ -9,9 +9,10 @@
 
 
 
-//#define IDLE  0
-//#define ON    1
-//#define FETCH 2
+
+#define DATA_OFF	0
+#define DATA_ON		1
+
 
 #define NUM_SAMPLES 200
 #define SAMPLE_RATE_MS 10 // 100hz = 10ms

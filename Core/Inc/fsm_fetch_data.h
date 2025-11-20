@@ -10,7 +10,6 @@
 
 #include "fsm.h"
 
-enum { DATA_OFF = 0, DATA_ON = 1 };
 extern fsm_trans_t fsm_data_fetch_tt[];
 fsm_t* fsm_fetch_data_new(void);
 

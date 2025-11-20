@@ -28,6 +28,7 @@
 #include "fsm.h"
 #include "fsm_system_led.h"
 #include "fsm_fetch_data.h"
+#include "fsm_magnetometer.h"
 #include "stm32f411e_discovery_accelerometer.h"
 /* USER CODE END Includes */
 
@@ -138,15 +139,17 @@ void MX_FREERTOS_Init(void) {
 void StartDefaultTask(void *argument)
 {
   /* init code for USB_HOST */
-	MX_USB_HOST_Init();
+  MX_USB_HOST_Init();
   /* USER CODE BEGIN StartDefaultTask */
 	fsm_t* f1 = fsm_system_led_new();
 	//fsm_t* f2 = fsm_fetch_data_new();
-  /* Infinite loop */
+	fsm_t* f3 = fsm_magnetometer_new();
+	/* Infinite loop */
   for(;;)
   {
 	fsm_fire(f1);
 	//fsm_fire(f2);
+	fsm_fire(f3);
 	// Delay para que el planificador pueda entrar en juego,
 	// Delay <= 5 para que funcione correctamente el sistema
 	osDelay(5);
