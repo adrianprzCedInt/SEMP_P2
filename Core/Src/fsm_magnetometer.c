@@ -4,15 +4,14 @@
 #include <stdint.h>
 #include <math.h>
 
-
 #include "arm_math.h"
 #include "main.h"
+#include "lsm303_mag.h"
 #include "stm32f411e_discovery_gyroscope.h"
 
 
 #define DATA_OFF	0
 #define DATA_ON		1
-
 
 #define NUM_SAMPLES 200
 #define SAMPLE_RATE_MS 10 // 100hz = 10ms
@@ -33,8 +32,8 @@ extern volatile uint8_t system_status;
 
 static uint32_t last_time = 0;
 static uint8_t samples = 0;
-static float32_t pDataXYZ[3];
-static float32_t gravity = 9.81;
+static int16_t magnetometerDataXYZ[3];
+static int16_t gravity = 9.81;
 
 /**
   * @brief  Get XYZ axes acceleration.
@@ -79,12 +78,12 @@ static int has_enough_samples(fsm_t* this) {
 ///		ACTION FUNCTIONS WHEN TRANSITIONS
 /////////////////////////////////////////////////////////////////////////
 static void fetch_data(fsm_t* this) {
-	BSP_GYRO_GetXYZ(pDataXYZ);
+	LSM303AGR_MagReadXYZ(magnetometerDataXYZ);
 	float32_t movimiento;
-	float32_t sqrt = pDataXYZ[0]*pDataXYZ[0] + pDataXYZ[1]*pDataXYZ[1] + pDataXYZ[2]*pDataXYZ[2];
+	float32_t sqrt = magnetometerDataXYZ[0]*magnetometerDataXYZ[0] + magnetometerDataXYZ[1]*magnetometerDataXYZ[1] + magnetometerDataXYZ[2]*magnetometerDataXYZ[2];
 	if (arm_sqrt_f32(sqrt, &movimiento) == ARM_MATH_SUCCESS){
-		movimiento = movimiento - gravity;
-		printf("Hola");
+		//movimiento = movimiento - gravity;
+		printf("Hola Prueba");
 		printf("Magnetometer %d\r\n", (int)movimiento);
 	}
 	if (movimiento > TH_MAX){
@@ -118,8 +117,6 @@ static void leds_off(fsm_t* this) {
 	HAL_GPIO_WritePin(GPIOD, Orange_Led_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(GPIOD, Green_Led_Pin, GPIO_PIN_RESET);
 }
-
-
 
 
 fsm_trans_t fsm_magnetometer_tt[] = {

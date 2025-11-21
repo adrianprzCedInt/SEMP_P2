@@ -29,7 +29,7 @@
 #include "fsm_system_led.h"
 #include "fsm_fetch_data.h"
 #include "fsm_magnetometer.h"
-#include "stm32f411e_discovery_accelerometer.h"
+//#include "stm32f411e_discovery_accelerometer.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -149,7 +149,7 @@ void StartDefaultTask(void *argument)
 	fsm_fire(f3);
 	// Delay para que el planificador pueda entrar en juego,
 	// Delay <= 5 para que funcione correctamente el sistema
-	osDelay(5);
+	osDelay(1);
   }
 
   /* USER CODE END StartDefaultTask */

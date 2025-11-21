@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdint.h>
 #include <sys/time.h>
@@ -11,8 +10,12 @@
 //======================
 // Config
 //======================
+#define OFF	0
+#define ON	1
+
 #define BLINK_PERIOD_MS 1000
 #define SLEEP_PERIOD_MS 2000
+
 static uint32_t last_time = 0;
 
 // Declared as extern here, defined in main.c
@@ -74,11 +77,13 @@ static int check_sleep (fsm_t* this)	{
 
 // Toggles blue led status ON -> OFF, OFF -> ON
 static void toggle_led (fsm_t* this) {
+	printf("[BUT] SYSTEM ON");
 	HAL_GPIO_TogglePin(GPIOD, Blue_Led_Pin);
 }
 
 // Sets all led's status => OFF even if not used, for requirements compliance.
 static void led_off (fsm_t* this) {
+	printf("[BUT] SYSTEM OFF");
 	HAL_GPIO_WritePin(GPIOD, Blue_Led_Pin, GPIO_PIN_RESET);
 }
 
@@ -94,7 +99,7 @@ static void sleep (fsm_t* this) {
 // Explicit FSM description
 // {INITIAL_STATE,	CHECKED_FUNCTION, 	NEXT_STATE, 	TRANSITION_FUNCTION}
 fsm_trans_t fsm_system_led_tt[] = {
-	{ OFF,      check_sleep, 			OFF,  	sleep 	  },
+	{ OFF,      check_sleep, 		OFF,  	sleep 	  	  },
 	{ OFF,      check_on, 			ON,  	toggle_led    },
 	{ ON, 		check_off, 			OFF,    led_off       },
 	{ ON, 		check_blink_period, ON,     toggle_led    },

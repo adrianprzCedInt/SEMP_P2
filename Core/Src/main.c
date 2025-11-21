@@ -26,11 +26,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "fsm.h"
-#include "fsm_system_led.h"
-#include "fsm_fetch_data.h"
 #include "stm32f411e_discovery_accelerometer.h"
 #include "stm32f411e_discovery_gyroscope.h"
+#include "lsm303_mag.h"
 
 
 /* USER CODE END Includes */
@@ -104,7 +102,8 @@ int main(void)
 
 
 	BSP_ACCELERO_Init();
-	BSP_GYRO_Init();
+	//BSP_GYRO_Init();
+	LSM303AGR_MagInit();
 
   /* USER CODE END 1 */
 
