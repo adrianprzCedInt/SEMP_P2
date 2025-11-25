@@ -74,21 +74,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	last_press_time = current_time;
 }
 
-
-
-
-
-/*
-	// debounce since hal delay cannot be used here
-	if ((current_time - last_press_time) > 500) {
-		last_press_time = current_time;
-		system_status = !system_status;
-		//green_or_red ^= 1;
-	}
- * */
-
-
-
 /* USER CODE END 0 */
 
 /**

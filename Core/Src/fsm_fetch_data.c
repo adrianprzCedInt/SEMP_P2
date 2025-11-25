@@ -3,22 +3,21 @@
 #include <stdint.h>
 #include <math.h>
 
+#include "arm_math.h"
 #include "fsm_fetch_data.h"
 #include "main.h"
 #include "stm32f411e_discovery_accelerometer.h"
 
-
-
-
 #define DATA_OFF	0
 #define DATA_ON		1
-
 
 #define NUM_SAMPLES 200
 #define SAMPLE_RATE_MS 10 // 100hz = 10ms
 
 // TH para comparación y detección de movimiento
-#define TH_MAX 20000 // Prueba y error, Calibración + Debug se ha sacado bastante rápido
+#define TH_MAX 300
+// Contante para pasar de LSB a mg segun datasheet
+#define LSB2mg 16129//Sensibilidad magnetometro segun ds 0.062mg/LSB / 1/0.062= 16129
 
 // Umbrales de comparación
 #define TH_NORMAL 50 // < 50 Situación Normal
@@ -26,6 +25,8 @@
 #define TH_EXTREME 100 // > 100 Actividad Extrema
 
 static uint8_t movement_counter = 0;
+static float32_t max_diff = 0;
+static float32_t min_diff = 100000000;
 
 // Represents the system state: 1 = active, 0 = inactive
 extern volatile uint8_t system_status;
@@ -33,6 +34,7 @@ extern volatile uint8_t system_status;
 static uint32_t last_time = 0;
 static uint8_t samples = 0;
 static int16_t pDataXYZ[3];
+static float32_t abs_acc;
 /**
   * @brief  Get XYZ axes acceleration.
   * @param  pDataXYZ: Pointer to 3 angular acceleration axes.
@@ -85,9 +87,20 @@ static int has_enough_samples(fsm_t* this) {
 /////////////////////////////////////////////////////////////////////////
 static void fetch_data(fsm_t* this) {
 	BSP_ACCELERO_GetXYZ(pDataXYZ);
-	uint32_t movimiento = sqrt(pDataXYZ[0]*pDataXYZ[0] + pDataXYZ[1]*pDataXYZ[1] + pDataXYZ[2]*pDataXYZ[2]);
 
-	if (movimiento > TH_MAX){
+	float32_t sqrt = pDataXYZ[0]*pDataXYZ[0] + pDataXYZ[1]*pDataXYZ[1] + pDataXYZ[2]*pDataXYZ[2];
+	if (arm_sqrt_f32(sqrt, &abs_acc) == ARM_MATH_SUCCESS){
+		abs_acc = (abs_acc/LSB2mg)*1000 -1000;
+	}
+
+	if (abs_acc > max_diff){
+		max_diff = abs_acc;
+	}
+	if (abs_acc < min_diff){
+		min_diff = abs_acc;
+	}
+
+	if (abs_acc > TH_MAX){
 		movement_counter++;
 	}
 	samples++;
@@ -95,6 +108,8 @@ static void fetch_data(fsm_t* this) {
 
 static void generate_results(fsm_t* this) {
 	samples = 0;
+	printf("[ACC] Maxima diferencia: %d, Minima diferencia: %d, Numero detecciones: %d\r\n", (int)max_diff, (int)min_diff, (int)movement_counter);
+
 	if(movement_counter <= TH_NORMAL ){
 		HAL_GPIO_WritePin(GPIOD, Green_Led_Pin, GPIO_PIN_SET);
 		HAL_GPIO_WritePin(GPIOD, Orange_Led_Pin, GPIO_PIN_RESET);

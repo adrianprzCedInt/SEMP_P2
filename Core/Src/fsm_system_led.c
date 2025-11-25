@@ -50,14 +50,7 @@ static int check_blink_period (fsm_t* this)	{
 		return 0;
 	}
 }
-/*
- 	uint32_t current_time = HAL_GetTick();
-	if ((current_time - last_press_time) > 500) {
-		last_press_time = current_time;
-		system_status = !system_status;
-	}
-	last_press_time = current_time;
- * */
+
 // Check SLEEP_MODE Period
 static int check_sleep (fsm_t* this)	{
 	  uint32_t now = HAL_GetTick();
@@ -70,24 +63,30 @@ static int check_sleep (fsm_t* this)	{
 	}
 }
 
-
 /////////////////////////////////////////////////////////////////////////
 ///		ACTION FUNCTIONS WHEN TRANSITIONS
 /////////////////////////////////////////////////////////////////////////
 
 // Toggles blue led status ON -> OFF, OFF -> ON
+static void system_led_on (fsm_t* this) {
+	printf("[BUT] SYSTEM ON\r\n");
+	HAL_GPIO_WritePin(GPIOD, Blue_Led_Pin, GPIO_PIN_SET);
+}
+
+
+// Toggles blue led status ON -> OFF, OFF -> ON
 static void toggle_led (fsm_t* this) {
-	printf("[BUT] SYSTEM ON");
 	HAL_GPIO_TogglePin(GPIOD, Blue_Led_Pin);
 }
 
 // Sets all led's status => OFF even if not used, for requirements compliance.
 static void led_off (fsm_t* this) {
-	printf("[BUT] SYSTEM OFF");
+	printf("[BUT] SYSTEM OFF\r\n");
 	HAL_GPIO_WritePin(GPIOD, Blue_Led_Pin, GPIO_PIN_RESET);
 }
 
 static void sleep (fsm_t* this) {
+	printf("[SYS] Going to sleep mode\r\n");
 	//Suspendemos contador de tick
 	HAL_SuspendTick();
 	//Habilitamos salir con interrupciones
@@ -100,7 +99,7 @@ static void sleep (fsm_t* this) {
 // {INITIAL_STATE,	CHECKED_FUNCTION, 	NEXT_STATE, 	TRANSITION_FUNCTION}
 fsm_trans_t fsm_system_led_tt[] = {
 	{ OFF,      check_sleep, 		OFF,  	sleep 	  	  },
-	{ OFF,      check_on, 			ON,  	toggle_led    },
+	{ OFF,      check_on, 			ON,  	system_led_on },
 	{ ON, 		check_off, 			OFF,    led_off       },
 	{ ON, 		check_blink_period, ON,     toggle_led    },
 	{-1, NULL, -1, NULL },

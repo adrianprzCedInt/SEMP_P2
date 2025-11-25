@@ -16,24 +16,19 @@
 #define NUM_SAMPLES 200
 #define SAMPLE_RATE_MS 10 // 100hz = 10ms
 
-// TH para comparación y detección de movimiento
-#define TH_MAX 20000 // Prueba y error, Calibración + Debug se ha sacado bastante rápido
-
-// Umbrales de comparación
-#define TH_NORMAL 50 // < 50 Situación Normal
-#define TH_HIGH 100 // 50 < x < 100 Actividad Alta
-#define TH_EXTREME 100 // > 100 Actividad Extrema
-
-static uint8_t movement_counter = 0;
-
 // Represents the system state: 1 = active, 0 = inactive
 extern volatile uint8_t system_status;
-
 
 static uint32_t last_time = 0;
 static uint8_t samples = 0;
 static int16_t magnetometerDataXYZ[3];
-static int16_t gravity = 9.81;
+
+static float32_t max_diff = 0;
+static float32_t max_diffX = 0;
+static float32_t max_diffY = 0;
+static float32_t max_diffZ = 0;
+static float32_t abs_mag;
+
 
 /**
   * @brief  Get XYZ axes acceleration.
@@ -79,37 +74,23 @@ static int has_enough_samples(fsm_t* this) {
 /////////////////////////////////////////////////////////////////////////
 static void fetch_data(fsm_t* this) {
 	LSM303AGR_MagReadXYZ(magnetometerDataXYZ);
-	float32_t movimiento;
 	float32_t sqrt = magnetometerDataXYZ[0]*magnetometerDataXYZ[0] + magnetometerDataXYZ[1]*magnetometerDataXYZ[1] + magnetometerDataXYZ[2]*magnetometerDataXYZ[2];
-	if (arm_sqrt_f32(sqrt, &movimiento) == ARM_MATH_SUCCESS){
-		//movimiento = movimiento - gravity;
-		printf("Hola Prueba");
-		printf("Magnetometer %d\r\n", (int)movimiento);
+	if (arm_sqrt_f32(sqrt, &abs_mag) == ARM_MATH_SUCCESS){
+		abs_mag = abs_mag;
 	}
-	if (movimiento > TH_MAX){
-		movement_counter++;
+	if(abs_mag > max_diff){
+		max_diff = abs_mag;
+		max_diffX = magnetometerDataXYZ[0];
+		max_diffY = magnetometerDataXYZ[1];
+		max_diffZ = magnetometerDataXYZ[2];
 	}
 	samples++;
 }
 
-static void generate_results(fsm_t* this) {
+static void generate_msg(fsm_t* this) {
 	samples = 0;
-	if(movement_counter <= TH_NORMAL ){
-		HAL_GPIO_WritePin(GPIOD, Green_Led_Pin, GPIO_PIN_SET);
-		HAL_GPIO_WritePin(GPIOD, Orange_Led_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(GPIOD, Red_Led_Pin, GPIO_PIN_RESET);
-	}
-	else if(TH_NORMAL < movement_counter && movement_counter <= TH_HIGH){
-		HAL_GPIO_WritePin(GPIOD, Green_Led_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(GPIOD, Orange_Led_Pin, GPIO_PIN_SET);
-		HAL_GPIO_WritePin(GPIOD, Red_Led_Pin, GPIO_PIN_RESET);
-	}else{
-		HAL_GPIO_WritePin(GPIOD, Green_Led_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(GPIOD, Orange_Led_Pin, GPIO_PIN_RESET);
-		HAL_GPIO_WritePin(GPIOD, Red_Led_Pin, GPIO_PIN_SET);
-	}
-	movement_counter = 0;
-
+	printf("[MAG] Maximo detectado: %d [X,Y,Z]: [%d,%d,%d]\r\n", (int)max_diff, (int)magnetometerDataXYZ[0], (int)magnetometerDataXYZ[1], (int)magnetometerDataXYZ[2]);
+	max_diff = 0;
 }
 
 static void leds_off(fsm_t* this) {
@@ -122,7 +103,7 @@ static void leds_off(fsm_t* this) {
 fsm_trans_t fsm_magnetometer_tt[] = {
 	{ DATA_OFF, check_on, DATA_ON, NULL },
 	{ DATA_ON, is_sample_time, DATA_ON, fetch_data },
-	{ DATA_ON, has_enough_samples, DATA_ON, generate_results },
+	{ DATA_ON, has_enough_samples, DATA_ON, generate_msg },
 	{ DATA_ON, check_off, DATA_OFF, leds_off},
 	{ -1, NULL, -1, NULL },
   };

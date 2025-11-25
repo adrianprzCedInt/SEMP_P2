@@ -139,17 +139,19 @@ void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN StartDefaultTask */
 	fsm_t* f1 = fsm_system_led_new();
-	//fsm_t* f2 = fsm_fetch_data_new();
+	fsm_t* f2 = fsm_fetch_data_new();
 	fsm_t* f3 = fsm_magnetometer_new();
 	/* Infinite loop */
   for(;;)
   {
 	fsm_fire(f1);
-	//fsm_fire(f2);
+	fsm_fire(f2);
 	fsm_fire(f3);
 	// Delay para que el planificador pueda entrar en juego,
 	// Delay <= 5 para que funcione correctamente el sistema
-	osDelay(1);
+	osDelayUntil(10);
+	//osDelay(1);
+
   }
 
   /* USER CODE END StartDefaultTask */
