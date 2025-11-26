@@ -2,7 +2,7 @@
 CAD.formats=
 CAD.pinconfig=
 CAD.provider=
-FREERTOS.BinarySemaphores01=i2c_sem,Dynamic,NULL,Available
+FREERTOS.BinarySemaphores01=i2c_sem,Dynamic,NULL,Available;printf_sem,Dynamic,NULL,Available
 FREERTOS.FootprintOK=true
 FREERTOS.HEAP_NUMBER=1
 FREERTOS.IPParameters=Tasks01,configENABLE_FPU,configRECORD_STACK_HIGH_ADDRESS,HEAP_NUMBER,configGENERATE_RUN_TIME_STATS,configUSE_STATS_FORMATTING_FUNCTIONS,configUSE_NEWLIB_REENTRANT,FootprintOK,BinarySemaphores01

@@ -1,10 +1,13 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <sys/time.h>
+
+#include "cmsis_os2.h"                  // ::CMSIS:RTOS2
 #include "main.h"
-#include "fsm.h"
 #include "fsm_system_led.h"
+#include "fsm.h"
 #include "cmsis_os.h"
+
 
 
 
@@ -72,7 +75,10 @@ static int check_sleep (fsm_t* this)	{
 
 // Toggles blue led status ON -> OFF, OFF -> ON
 static void system_led_on (fsm_t* this) {
+	if(osSemaphoreAcquire(printf_semHandle, 5) == osOK){
 	printf("[BUT] SYSTEM ON\r\n");
+	osSemaphoreRelease(printf_semHandle);
+	}
 	HAL_GPIO_WritePin(GPIOD, Blue_Led_Pin, GPIO_PIN_SET);
 }
 
@@ -84,7 +90,10 @@ static void toggle_led (fsm_t* this) {
 
 // Sets all led's status => OFF even if not used, for requirements compliance.
 static void led_off (fsm_t* this) {
+	if(osSemaphoreAcquire(printf_semHandle, 5) == osOK){
 	printf("[BUT] SYSTEM OFF\r\n");
+	osSemaphoreRelease(printf_semHandle);
+	}
 	HAL_GPIO_WritePin(GPIOD, Blue_Led_Pin, GPIO_PIN_RESET);
 }
 

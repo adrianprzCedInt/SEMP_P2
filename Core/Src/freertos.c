@@ -84,6 +84,11 @@ osSemaphoreId_t i2c_semHandle;
 const osSemaphoreAttr_t i2c_sem_attributes = {
   .name = "i2c_sem"
 };
+/* Definitions for printf_sem */
+osSemaphoreId_t printf_semHandle;
+const osSemaphoreAttr_t printf_sem_attributes = {
+  .name = "printf_sem"
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -134,6 +139,9 @@ void MX_FREERTOS_Init(void) {
   /* Create the semaphores(s) */
   /* creation of i2c_sem */
   i2c_semHandle = osSemaphoreNew(1, 1, &i2c_sem_attributes);
+
+  /* creation of printf_sem */
+  printf_semHandle = osSemaphoreNew(1, 1, &printf_sem_attributes);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */

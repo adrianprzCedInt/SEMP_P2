@@ -116,12 +116,14 @@ static void fetch_data(fsm_t* this) {
 
 static void generate_results(fsm_t* this) {
 	samples = 0;
+	if(osSemaphoreAcquire(printf_semHandle, 5) == osOK){
 	//printf("[ACC] Maxima diferencia: %d, Minima diferencia: %d, Numero detecciones: %d\r\n", (int)max_diff, (int)min_diff, (int)movement_counter);
 	printf("-------------------------------------------------------\r\n");
 	printf("[ACC] Maxima diferencia: %d\r\n", (int)max_diff);
 	printf("[ACC] Minima diferencia: %d\r\n", (int)min_diff);
 	printf("[ACC] Numero detecciones: %d\r\n", (int)movement_counter);
-
+	osSemaphoreRelease(printf_semHandle);
+	}
 	if(movement_counter <= TH_NORMAL ){
 		HAL_GPIO_WritePin(GPIOD, Green_Led_Pin, GPIO_PIN_SET);
 		HAL_GPIO_WritePin(GPIOD, Orange_Led_Pin, GPIO_PIN_RESET);

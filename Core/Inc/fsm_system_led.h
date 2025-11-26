@@ -11,5 +11,7 @@
 	extern fsm_trans_t fsm_system_led_tt[];
 	fsm_t* fsm_system_led_new(void);
 	void fsm_system_led_task(void* arguments);
+	extern osSemaphoreId_t printf_semHandle;
+
 
 #endif /* FSM_BLINK_H */

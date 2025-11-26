@@ -97,9 +97,11 @@ static void fetch_data(fsm_t* this) {
 
 static void generate_msg(fsm_t* this) {
 	samples = 0;
+	if(osSemaphoreAcquire(printf_semHandle, 5) == osOK){
 	printf("[MAG] Maximo detectado: %d [X,Y,Z]: [%d,%d,%d]\r\n", (int)max_diff, (int)magnetometerDataXYZ[0], (int)magnetometerDataXYZ[1], (int)magnetometerDataXYZ[2]);
 	printf("-------------------------------------------------------\r\n");
-
+	osSemaphoreRelease(printf_semHandle);
+	}
 	max_diff = 0;
 }
 
