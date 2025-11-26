@@ -12,5 +12,7 @@
 
 extern fsm_trans_t fsm_magnetometer_tt[];
 fsm_t* fsm_magnetometer_new(void);
+void fsm_system_mag_task(void* arguments);
+extern osSemaphoreId_t i2c_semHandle;
 
 #endif /* INC_FSM_MAGNETOMETER_H_ */

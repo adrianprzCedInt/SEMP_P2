@@ -64,7 +64,7 @@ void MX_FREERTOS_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+/*
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	uint32_t current_time = HAL_GetTick();
 	if ((current_time - last_press_time) > 500) {
@@ -73,7 +73,15 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	}
 	last_press_time = current_time;
 }
-
+*/
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+	//uint32_t current_time = osKernelGetTickCount();
+	uint32_t current_time = xTaskGetTickCountFromISR();
+	if ((current_time - last_press_time) > 500) {
+		system_status = !system_status;
+	}
+	last_press_time = current_time;
+}
 /* USER CODE END 0 */
 
 /**
@@ -84,11 +92,6 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-
-
-	BSP_ACCELERO_Init();
-	//BSP_GYRO_Init();
-	LSM303AGR_MagInit();
 
   /* USER CODE END 1 */
 
@@ -114,7 +117,9 @@ int main(void)
   MX_SPI1_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
-
+	BSP_ACCELERO_Init();
+	//BSP_GYRO_Init();
+	LSM303AGR_MagInit();
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -162,7 +167,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 4;
-  RCC_OscInitStruct.PLL.PLLN = 120;
+  RCC_OscInitStruct.PLL.PLLN = 192;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV4;
   RCC_OscInitStruct.PLL.PLLQ = 5;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
@@ -175,11 +180,11 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV4;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_3) != HAL_OK)
   {
     Error_Handler();
   }

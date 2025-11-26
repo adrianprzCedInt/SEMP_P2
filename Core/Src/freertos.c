@@ -58,6 +58,32 @@ const osThreadAttr_t defaultTask_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
+/* Definitions for task_acc */
+osThreadId_t task_accHandle;
+const osThreadAttr_t task_acc_attributes = {
+  .name = "task_acc",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for task_led */
+osThreadId_t task_ledHandle;
+const osThreadAttr_t task_led_attributes = {
+  .name = "task_led",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for task_mag */
+osThreadId_t task_magHandle;
+const osThreadAttr_t task_mag_attributes = {
+  .name = "task_mag",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for i2c_sem */
+osSemaphoreId_t i2c_semHandle;
+const osSemaphoreAttr_t i2c_sem_attributes = {
+  .name = "i2c_sem"
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -65,6 +91,9 @@ const osThreadAttr_t defaultTask_attributes = {
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void *argument);
+extern void fsm_system_acc_task(void *argument);
+extern void fsm_system_led_task(void *argument);
+extern void fsm_system_mag_task(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -102,6 +131,10 @@ void MX_FREERTOS_Init(void) {
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
 
+  /* Create the semaphores(s) */
+  /* creation of i2c_sem */
+  i2c_semHandle = osSemaphoreNew(1, 1, &i2c_sem_attributes);
+
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
   /* USER CODE END RTOS_SEMAPHORES */
@@ -117,6 +150,15 @@ void MX_FREERTOS_Init(void) {
   /* Create the thread(s) */
   /* creation of defaultTask */
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+
+  /* creation of task_acc */
+  task_accHandle = osThreadNew(fsm_system_acc_task, NULL, &task_acc_attributes);
+
+  /* creation of task_led */
+  task_ledHandle = osThreadNew(fsm_system_led_task, NULL, &task_led_attributes);
+
+  /* creation of task_mag */
+  task_magHandle = osThreadNew(fsm_system_mag_task, NULL, &task_mag_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -138,19 +180,19 @@ void MX_FREERTOS_Init(void) {
 void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN StartDefaultTask */
-	fsm_t* f1 = fsm_system_led_new();
-	fsm_t* f2 = fsm_fetch_data_new();
-	fsm_t* f3 = fsm_magnetometer_new();
+	//fsm_t* f1 = fsm_system_led_new();
+	//fsm_t* f2 = fsm_fetch_data_new();
+	//fsm_t* f3 = fsm_magnetometer_new();
 	/* Infinite loop */
   for(;;)
   {
-	fsm_fire(f1);
-	fsm_fire(f2);
-	fsm_fire(f3);
+	//fsm_fire(f1);
+	//fsm_fire(f2);
+	//fsm_fire(f3);
 	// Delay para que el planificador pueda entrar en juego,
 	// Delay <= 5 para que funcione correctamente el sistema
-	osDelayUntil(10);
-	//osDelay(1);
+	//osDelayUntil(10);
+	osDelay(1);
 
   }
 

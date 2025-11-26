@@ -10,5 +10,6 @@
 //======================================
 	extern fsm_trans_t fsm_system_led_tt[];
 	fsm_t* fsm_system_led_new(void);
+	void fsm_system_led_task(void* arguments);
 
 #endif /* FSM_BLINK_H */

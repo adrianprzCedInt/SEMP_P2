@@ -3,10 +3,13 @@
 #include <stdint.h>
 #include <math.h>
 
+#include "cmsis_os2.h"                  // ::CMSIS:RTOS2
+//#include "freertos.c"
 #include "arm_math.h"
 #include "fsm_fetch_data.h"
 #include "main.h"
 #include "stm32f411e_discovery_accelerometer.h"
+#include "cmsis_os.h"
 
 #define DATA_OFF	0
 #define DATA_ON		1
@@ -14,8 +17,8 @@
 #define NUM_SAMPLES 200
 #define SAMPLE_RATE_MS 10 // 100hz = 10ms
 
-// TH para comparación y detección de movimiento
-#define TH_MAX 300
+// TH en mg para comparación y detección de movimiento
+#define TH_MAX 400
 // Contante para pasar de LSB a mg segun datasheet
 #define LSB2mg 16129//Sensibilidad magnetometro segun ds 0.062mg/LSB / 1/0.062= 16129
 
@@ -65,7 +68,8 @@ static int check_off (fsm_t* this)	{
 }
 
 static int is_sample_time (fsm_t* this) {
-	uint32_t now = HAL_GetTick();
+	//uint32_t now = HAL_GetTick();
+	uint32_t now = osKernelGetTickCount();
 	if ((now - last_time) >= SAMPLE_RATE_MS) {
 		last_time = now;
 		return 1;
@@ -75,7 +79,7 @@ static int is_sample_time (fsm_t* this) {
 }
 
 static int has_enough_samples(fsm_t* this) {
-	if (samples == NUM_SAMPLES) {
+	if (samples >= NUM_SAMPLES) {
 		return 1;
 	} else {
 		return 0;
@@ -86,7 +90,11 @@ static int has_enough_samples(fsm_t* this) {
 ///		ACTION FUNCTIONS WHEN TRANSITIONS
 /////////////////////////////////////////////////////////////////////////
 static void fetch_data(fsm_t* this) {
-	BSP_ACCELERO_GetXYZ(pDataXYZ);
+	if(osSemaphoreAcquire(i2c_semHandle, 5) == osOK){
+		BSP_ACCELERO_GetXYZ(pDataXYZ);
+		osSemaphoreRelease(i2c_semHandle);
+	}
+
 
 	float32_t sqrt = pDataXYZ[0]*pDataXYZ[0] + pDataXYZ[1]*pDataXYZ[1] + pDataXYZ[2]*pDataXYZ[2];
 	if (arm_sqrt_f32(sqrt, &abs_acc) == ARM_MATH_SUCCESS){
@@ -108,7 +116,11 @@ static void fetch_data(fsm_t* this) {
 
 static void generate_results(fsm_t* this) {
 	samples = 0;
-	printf("[ACC] Maxima diferencia: %d, Minima diferencia: %d, Numero detecciones: %d\r\n", (int)max_diff, (int)min_diff, (int)movement_counter);
+	//printf("[ACC] Maxima diferencia: %d, Minima diferencia: %d, Numero detecciones: %d\r\n", (int)max_diff, (int)min_diff, (int)movement_counter);
+	printf("-------------------------------------------------------\r\n");
+	printf("[ACC] Maxima diferencia: %d\r\n", (int)max_diff);
+	printf("[ACC] Minima diferencia: %d\r\n", (int)min_diff);
+	printf("[ACC] Numero detecciones: %d\r\n", (int)movement_counter);
 
 	if(movement_counter <= TH_NORMAL ){
 		HAL_GPIO_WritePin(GPIOD, Green_Led_Pin, GPIO_PIN_SET);
@@ -137,13 +149,29 @@ static void leds_off(fsm_t* this) {
 
 fsm_trans_t fsm_data_fetch_tt[] = {
 	{ DATA_OFF, check_on, DATA_ON, NULL },
-	{ DATA_ON, is_sample_time, DATA_ON, fetch_data },
 	{ DATA_ON, has_enough_samples, DATA_ON, generate_results },
+	{ DATA_ON, is_sample_time, DATA_ON, fetch_data },
 	{ DATA_ON, check_off, DATA_OFF, leds_off},
 	{ -1, NULL, -1, NULL },
   };
 
 fsm_t* fsm_fetch_data_new(void) {
   return fsm_new(fsm_data_fetch_tt);
+}
+
+void fsm_system_acc_task(void* arguments) {
+
+	fsm_t* fs = fsm_fetch_data_new();
+	const uint32_t period = SAMPLE_RATE_MS;
+	uint32_t last_wake = osKernelGetTickCount();
+	for (;;) {
+	    fsm_fire(fs);
+	    osDelayUntil(last_wake + period);
+	    last_wake += period;
+		//uint32_t next_period = osKernelGetTickCount() + 1;
+
+		//osDelayUntil(next_period);
+		//osDelay(3);
+	}
 }
 

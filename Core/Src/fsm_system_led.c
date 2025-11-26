@@ -4,6 +4,7 @@
 #include "main.h"
 #include "fsm.h"
 #include "fsm_system_led.h"
+#include "cmsis_os.h"
 
 
 
@@ -41,7 +42,8 @@ static int check_off (fsm_t* this)	{
 
 // Check transition function, each BLINK_PERIOD_MS the led toggles
 static int check_blink_period (fsm_t* this)	{
-	  uint32_t now = HAL_GetTick();
+	  //uint32_t now = HAL_GetTick();
+	  uint32_t now = osKernelGetTickCount();
 	// Check toogle period
 	if ((now - last_time) >= BLINK_PERIOD_MS) {
 		last_time = now;
@@ -53,7 +55,8 @@ static int check_blink_period (fsm_t* this)	{
 
 // Check SLEEP_MODE Period
 static int check_sleep (fsm_t* this)	{
-	  uint32_t now = HAL_GetTick();
+	//uint32_t now = HAL_GetTick();
+	uint32_t now = osKernelGetTickCount();
 	// Check toogle period
 	if ((now - last_time) >= SLEEP_PERIOD_MS) {
 		last_time = now;
@@ -98,7 +101,7 @@ static void sleep (fsm_t* this) {
 // Explicit FSM description
 // {INITIAL_STATE,	CHECKED_FUNCTION, 	NEXT_STATE, 	TRANSITION_FUNCTION}
 fsm_trans_t fsm_system_led_tt[] = {
-	{ OFF,      check_sleep, 		OFF,  	sleep 	  	  },
+	//{ OFF,      check_sleep, 		OFF,  	sleep 	  	  },
 	{ OFF,      check_on, 			ON,  	system_led_on },
 	{ ON, 		check_off, 			OFF,    led_off       },
 	{ ON, 		check_blink_period, ON,     toggle_led    },
@@ -107,4 +110,21 @@ fsm_trans_t fsm_system_led_tt[] = {
 
 fsm_t* fsm_system_led_new(void) {
   return fsm_new(fsm_system_led_tt);
+}
+
+void fsm_system_led_task(void* arguments) {
+
+	fsm_t* fs = fsm_system_led_new();
+    uint32_t period = 4; // ms → 100 Hz
+    uint32_t last_wake = osKernelGetTickCount();
+
+	for (;;) {
+		fsm_fire(fs);
+        osDelayUntil(last_wake + period);
+        last_wake += period;
+		//uint32_t next_period = osKernelGetTickCount() + 1;
+
+		//osDelayUntil(next_period);
+		//osDelay(3);
+	}
 }
